@@ -44,4 +44,53 @@ class CompilerTest extends FunSuite {
         assert(lst == lst3)
     }
 
+    test("minus test") {                                  // this test passed
+        println("================================================")
+        println(" Converting a MINUS(e1,e2) into instruction test")
+        val e = Minus(Const(5.0), Const(3.0))
+        val lst = StackMachineCompiler.compileToStackMachineCode(e)
+        //println("----")
+        //lst.foreach(println)
+        //println("----")
+        println("YOUR INSTRUCTION LIST: ", lst)
+        assert(lst == List(PushI(5.0),PushI(3.0), SubI))
+    }
+
+    test("division test") {                             // this test passed
+        println("================================================")
+        println(" Converting a Div(e1,e2) into instruction test")
+        val e = Div(Const(15.0), Const(3.0))
+        val lst = StackMachineCompiler.compileToStackMachineCode(e)
+        //println("----")
+        //lst.foreach(println)
+        //println("----")
+        println("YOUR INSTRUCTION LIST: ", lst)
+        assert(lst == List(PushI(15.0),PushI(3.0), DivI))
+    }
+
+    test("cosine expression") {                       // this test passed
+        println("================================================")
+        println(" Converting a COSINE into instruction test")
+        val e1 = Cosine(Const(2.5))
+        val lst = StackMachineCompiler.compileToStackMachineCode(e1)
+        //println("----")
+        //lst.foreach(println)
+        //println("----")
+        val c1 = List(PushI(2.5), CosI)
+        println("YOUR INSTRUCTION LIST: ", lst)
+        assert( lst == c1 )
+    }
+
+    test("sine expression ") {                          // this test passed
+        println("================================================")
+        println(" Converting a SINE into instruction test")
+        val e1 = Sine(Const(2.5))
+        val lst = StackMachineCompiler.compileToStackMachineCode(e1)
+        //println("----")
+        //lst.foreach(println)
+        //println("----")
+        val c1 = List(PushI(2.5), SinI)
+        println("YOUR INSTRUCTION LIST: ", lst)
+        assert( lst == c1 )
+    }
 }

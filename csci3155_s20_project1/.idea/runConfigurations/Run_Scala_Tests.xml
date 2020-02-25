@@ -7,8 +7,8 @@
       <list>
         <option value="edu.colorado.csci3155.project1.CompilerTest" />
         <option value="edu.colorado.csci3155.project1.StackMachineTest" />
-        <option value="edu.colorado.csci3155.project1.StackMachineTest" />
         <option value="edu.colorado.csci3155.project1.CompilerTest" />
+        <option value="edu.colorado.csci3155.project1.StackMachineTest" />
       </list>
     </option>
     <option name="envs">

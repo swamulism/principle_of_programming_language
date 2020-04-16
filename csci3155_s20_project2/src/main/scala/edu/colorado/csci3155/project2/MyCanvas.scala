@@ -11,6 +11,7 @@ import java.awt.{Graphics2D}
 sealed trait Figure {
     def getBoundingBox: (Double, Double, Double, Double)
     def translate(shiftX: Double, shiftY: Double): Figure
+    def rotate(angRad: Double): Figure
     def render(g: Graphics2D, scaleX: Double, scaleY: Double, shiftX: Double, shiftY: Double): Unit
 }
 
@@ -32,7 +33,13 @@ case class Polygon(val cList: List[(Double, Double)]) extends Figure {
     //TODO: Create a new polygon by shifting each vertex in cList by (x,y)
     //    Do not change the order in which the vertices appear
     override def translate(shiftX: Double, shiftY: Double): Polygon = {
-        Polygon(cList.map((x) => (x._1 + shiftX, x._2 + shiftY)))
+        Polygon(cList.map(x => (x._1 + shiftX, x._2 + shiftY)))
+    }
+
+    override def rotate(angRad: Double): Polygon = {
+        Polygon(cList.map(x =>
+            (x._1 * math.cos(angRad) - x._2 * math.sin(angRad), x._1 * math.sin(angRad) + x._2 * math.cos(angRad)))
+        )
     }
 
     // Function: render -- draw the polygon. Do not edit this function.
@@ -65,6 +72,11 @@ case class MyCircle(val c: (Double, Double), val r: Double) extends Figure {
     //TODO: Create a new circle by shifting the center
     override def translate(shiftX: Double, shiftY: Double): MyCircle = {
         MyCircle((c._1 + shiftX, c._2 + shiftY), r)
+    }
+
+    override def rotate(angRad: Double): MyCircle = {
+        val newC = (c._1 * math.cos(angRad) - c._2 * math.sin(angRad), c._1 * math.sin(angRad) + c._2 * math.cos(angRad))
+        MyCircle(newC, r)
     }
 
     // Function: render -- draw the polygon. Do not edit this function.
@@ -127,7 +139,9 @@ class MyCanvas (val listOfObjects: List[Figure]) {
     // Suggestion: first write rotation functions for polygon and circle.
     // rotating a polygon is simply rotating each vertex.
     // rotating a circle is simply rotating the center with radius unchanged.
-    def rotate(angRad: Double): MyCanvas = ???
+    def rotate(angRad: Double): MyCanvas = {
+        new MyCanvas(listOfObjects.map(x => x.rotate(angRad)))
+    }
 
     //Function: overlap
     // This function takes a list of objects from this canvas

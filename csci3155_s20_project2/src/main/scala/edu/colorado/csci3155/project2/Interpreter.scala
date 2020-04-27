@@ -16,14 +16,63 @@ object Interpreter {
         case Const(d) => NumValue(d)
         case ConstBool(b) => BoolValue(b)
         case Ident(s) => env.lookup(s)
-        case Line(l) => ??? //TODO: Handle a line object
-        case EquiTriangle(sideLength) => ??? // TODO: Handle Equilateral Triangle
-        case Rectangle(sideLength) => ??? // TODO: Handle square given the side length
-        case Circle(rad) => ??? //TODO: Handle circle
-        case Plus (e1, e2) => ??? // TODO: Handle addition of numbers or figures
+        case Line(l) => {
+            val v1 = evalExpr(l, env)
+            v1 match {
+                case NumValue(v) => FigValue(new MyCanvas(List(Polygon(List((0,0),(v,0))))))
+                case _ => throw new IllegalArgumentException("Error eval line")
+            }
+        } //TODO: Handle a line object
+        case EquiTriangle(sideLength) => {
+            val v1 = evalExpr(sideLength, env)
+            v1 match {
+                case NumValue(v) => FigValue(new MyCanvas(List(Polygon(List((0,0),(v,0),(v/2, math.sqrt(3)*v/2))))))
+                case _ => throw new IllegalArgumentException("Error eval triangle")
+            }
+        } // TODO: Handle Equilateral Triangle
+        case Rectangle(sideLength) => {
+            val v1 = evalExpr(sideLength, env)
+            v1 match {
+                case NumValue(v) => FigValue(new MyCanvas(List(Polygon(List((0,0),(v,0),(v,v),(0,v))))))
+                case _ => throw new IllegalArgumentException("Error eval rectangle")
+            }
+        } // TODO: Handle square given the side length
+        case Circle(rad) => {
+            val v1 = evalExpr(rad, env)
+            v1 match {
+                case NumValue(v) => FigValue(new MyCanvas(List(MyCircle((v,v),v))))
+                case _ => throw new IllegalArgumentException("Error eval circle")
+            }
+        } //TODO: Handle circle
+        case Plus (e1, e2) => {
+            val v1 = evalExpr(e1, env)
+            val v2 = evalExpr(e2, env)
+            (v1, v2) match {
+                case (NumValue(x1), NumValue(x2)) => NumValue(x1 + x2)
+                case (FigValue(x1), FigValue(x2)) => FigValue(x1.overlap(x2))
+                case _ => throw new IllegalArgumentException("can not add given types")
+            }
+        } // TODO: Handle addition of numbers or figures
         case Minus (e1, e2) => binaryExprEval(e1, e2, env) (ValueOps.minus)
-        case Mult(e1, e2) => ??? // TODO: Handle multiplication of numbers or figures
-        case Div(e1, e2) => ??? // TODO: Handle division
+        case Mult(e1, e2) => {
+            val v1 = evalExpr(e1, env)
+            val v2 = evalExpr(e2, env)
+            (v1, v2) match {
+                case (NumValue(x1), NumValue(x2)) => NumValue(x1 * x2)
+                case (FigValue(x1), FigValue(x2)) => FigValue(x1.placeRight(x2))
+                case _ => throw new IllegalArgumentException("can not mult given types")
+            }
+        } // TODO: Handle multiplication of numbers or figures
+        case Div(e1, e2) => {
+            val v1 = evalExpr(e1, env)
+            val v2 = evalExpr(e2, env)
+            (v1, v2) match {
+                case (NumValue(x1), NumValue(x2)) => NumValue(x1 / x2)
+                case (FigValue(x1), FigValue(x2)) => FigValue(x1.placeTop(x2))
+                case (FigValue(x1), NumValue(x2)) => FigValue(x1.rotate(x2))
+                case _ => throw new IllegalArgumentException("can not mult given types")
+            }
+        } // TODO: Handle division
         case Geq(e1, e2) => binaryExprEval(e1, e2, env) (ValueOps.geq)
         case Gt(e1, e2) => binaryExprEval(e1, e2, env) (ValueOps.gt)
         case Eq(e1, e2) => binaryExprEval(e1, e2, env) (ValueOps.equal)
@@ -82,9 +131,22 @@ object Interpreter {
             evalExpr(e2, env2)
         }
 
-        case FunDef(x, e) => ??? //TODO: Handle function definitions
-        case LetRec(f, x, e1, e2) => ??? // TODO: Handle recursive functions -- look at Environment.scala
-        case FunCall(fCallExpr, arg) => ??? // TODO: Handle function calls
+        case FunDef(x, e) => Closure(x, e, env) //TODO: Handle function definitions
+        case LetRec(f, x, e1, e2) => {
+            val env2 = ExtendREC(f, x, e1, env)
+            evalExpr(e2, env2)
+        } // TODO: Handle recursive functions -- look at Environment.scala
+        case FunCall(fCallExpr, arg) => {
+            val v1 = evalExpr(fCallExpr, env)
+            val v2 = evalExpr(arg, env)
+            v1 match {
+                case Closure(x, expr, cenv) => {
+                    val new_env = Extend(x, v2, cenv)
+                    evalExpr(expr, new_env)
+                }
+                case _ => throw new IllegalArgumentException("FunCall on non closure")
+            }
+        } // TODO: Handle function calls
     }
 
     def evalProgram(p: Program): Value = p match {
